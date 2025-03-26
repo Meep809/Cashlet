@@ -105,7 +105,7 @@
     </div>
 
     <div id="question"></div>
-    <div id="answers"></div>
+    <div id="answers" style="display: none;"></div> <!-- Initially hidden answers -->
     <div id="message" class="message"></div>
 
     <div>
@@ -130,10 +130,11 @@
         document.getElementById("question").innerText = "No questions available.";
         return;
       }
-      
+
       const question = quizData[currentQuestion];
       document.getElementById("question").innerText = question.question;
       const answersDiv = document.getElementById("answers");
+      answersDiv.style.display = "none"; // Hide the answers initially
       answersDiv.innerHTML = ""; // Clear previous answers
       const shuffledAnswers = shuffleArray(question.answers);
 
@@ -191,6 +192,7 @@
       localStorage.setItem("quizData", JSON.stringify(quizData)); // Save to localStorage
       alert("Question added!");
       renderQuestionList();
+      renderQuestion(); // Render the most recent question
     }
 
     // Function to move to the next question
