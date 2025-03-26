@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cashlet</title>
+  <title>Cashify</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,6 +21,10 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       width: 400px;
       text-align: center;
+    }
+    h2 {
+      padding: 10px;
+      margin: 0;
     }
     .answer {
       margin: 10px 0;
@@ -59,12 +63,35 @@
     button:hover {
       background-color: #45a049;
     }
+    .delete-btn {
+      background-color: red;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: darkred;
+    }
+    .clear-btn {
+      background-color: #ff4d4d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .clear-btn:hover {
+      background-color: #e60000;
+    }
   </style>
 </head>
 <body>
-  
+
   <div class="quiz-container">
-    <h2>Cashlet - Because Quizlet is greedy</h2>
+    <h2>Cashify - Because Quizlet is greedy</h2>
 
     <div class="input-container">
       <h3>Add a New Question</h3>
@@ -85,6 +112,11 @@
       <button onclick="previousQuestion()">Previous Question</button>
       <button onclick="nextQuestion()">Next Question</button>
     </div>
+
+    <h3>Questions</h3>
+    <div id="question-list"></div>
+
+    <button class="clear-btn" onclick="clearQuiz()">Delete All Questions</button>
   </div>
 
   <script>
@@ -158,6 +190,7 @@
       quizData.push(newQuestionData);
       localStorage.setItem("quizData", JSON.stringify(quizData)); // Save to localStorage
       alert("Question added!");
+      renderQuestionList();
     }
 
     // Function to move to the next question
@@ -172,8 +205,45 @@
       renderQuestion();
     }
 
+    // Function to render the list of questions
+    function renderQuestionList() {
+      const questionListDiv = document.getElementById("question-list");
+      questionListDiv.innerHTML = "";
+      
+      quizData.forEach((question, index) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.innerHTML = `
+          <p>${question.question}</p>
+          <button class="delete-btn" onclick="deleteQuestion(${index})">Delete</button>
+        `;
+        questionListDiv.appendChild(questionDiv);
+      });
+    }
+
+    // Function to delete a question
+    function deleteQuestion(index) {
+      quizData.splice(index, 1); // Remove the question from the array
+      localStorage.setItem("quizData", JSON.stringify(quizData)); // Update localStorage
+      renderQuestionList(); // Re-render the list of questions
+      if (currentQuestion >= quizData.length) {
+        currentQuestion = quizData.length - 1; // Adjust current question if it's deleted
+      }
+      renderQuestion();
+    }
+
+    // Function to clear all questions
+    function clearQuiz() {
+      if (confirm("Are you sure you want to delete all questions?")) {
+        quizData = [];
+        localStorage.setItem("quizData", JSON.stringify(quizData)); // Clear localStorage
+        renderQuestionList(); // Re-render the empty list
+        renderQuestion(); // Clear the current question
+      }
+    }
+
     // Initialize by rendering the first question if available
     renderQuestion();
+    renderQuestionList();
   </script>
 
 </body>
