@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashlet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      margin: 0;
+    }
+    .quiz-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+    .answer {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .answer:hover {
+      background-color: #e0e0e0;
+    }
+    .message {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: green;
+    }
+    .input-container {
+      margin-bottom: 20px;
+    }
+    .input-container input,
+    .input-container button {
+      padding: 10px;
+      margin: 5px;
+      width: 80%;
+    }
+    button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+ <h2>Because Quizlet is greedy</h2>
+  <div class="quiz-container">
+    <h2>Quiz: Flashcard Style</h2>
+
+    <div class="input-container">
+      <h3>Add a New Question</h3>
+      <input type="text" id="new-question" placeholder="Enter question" />
+      <input type="text" id="answer1" placeholder="Enter answer 1" />
+      <input type="text" id="answer2" placeholder="Enter answer 2" />
+      <input type="text" id="answer3" placeholder="Enter answer 3" />
+      <input type="text" id="answer4" placeholder="Enter answer 4" />
+      <input type="text" id="correct-answer" placeholder="Enter correct answer" />
+      <button onclick="addQuestion()">Add Question</button>
+    </div>
+
+    <div id="question"></div>
+    <div id="answers"></div>
+    <div id="message" class="message"></div>
+
+    <div>
+      <button onclick="previousQuestion()">Previous Question</button>
+      <button onclick="nextQuestion()">Next Question</button>
+    </div>
+  </div>
+
+  <script>
+    // Initialize quiz data from localStorage or use a default set
+    let quizData = JSON.parse(localStorage.getItem("quizData")) || [];
+    let currentQuestion = 0;
+
+    // Function to render a new question and answers
+    function renderQuestion() {
+      if (quizData.length === 0) {
+        document.getElementById("question").innerText = "No questions available.";
+        return;
+      }
+      
+      const question = quizData[currentQuestion];
+      document.getElementById("question").innerText = question.question;
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = ""; // Clear previous answers
+      const shuffledAnswers = shuffleArray(question.answers);
+
+      shuffledAnswers.forEach(answer => {
+        const answerDiv = document.createElement("div");
+        answerDiv.classList.add("answer");
+        answerDiv.innerText = answer;
+        answerDiv.onclick = () => checkAnswer(answer, question.correctAnswer);
+        answersDiv.appendChild(answerDiv);
+      });
+    }
+
+    // Function to check if the answer is correct
+    function checkAnswer(selectedAnswer, correctAnswer) {
+      const messageDiv = document.getElementById("message");
+      if (selectedAnswer === correctAnswer) {
+        messageDiv.innerText = "Correct!";
+        messageDiv.style.color = "green";
+      } else {
+        messageDiv.innerText = "Wrong answer, try again!";
+        messageDiv.style.color = "red";
+      }
+    }
+
+    // Function to shuffle the answer choices
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+      }
+      return array;
+    }
+
+    // Add a new question to the quiz
+    function addQuestion() {
+      const newQuestion = document.getElementById("new-question").value;
+      const answer1 = document.getElementById("answer1").value;
+      const answer2 = document.getElementById("answer2").value;
+      const answer3 = document.getElementById("answer3").value;
+      const answer4 = document.getElementById("answer4").value;
+      const correctAnswer = document.getElementById("correct-answer").value;
+
+      if (!newQuestion || !answer1 || !answer2 || !answer3 || !answer4 || !correctAnswer) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const newQuestionData = {
+        question: newQuestion,
+        correctAnswer: correctAnswer,
+        answers: [answer1, answer2, answer3, answer4]
+      };
+
+      quizData.push(newQuestionData);
+      localStorage.setItem("quizData", JSON.stringify(quizData)); // Save to localStorage
+      alert("Question added!");
+    }
+
+    // Function to move to the next question
+    function nextQuestion() {
+      currentQuestion = (currentQuestion + 1) % quizData.length; // Loop through questions
+      renderQuestion();
+    }
+
+    // Function to move to the previous question
+    function previousQuestion() {
+      currentQuestion = (currentQuestion - 1 + quizData.length) % quizData.length; // Loop back to the last question if at the first
+      renderQuestion();
+    }
+
+    // Initialize by rendering the first question if available
+    renderQuestion();
+  </script>
+
+</body>
+</html>
